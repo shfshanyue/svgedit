@@ -655,14 +655,31 @@ const setStrokeAttrMethod = (attr, val) => {
   }
 }
 
+const getSelectedTextElements = () => {
+  return svgCanvas.getSelectedElements().filter(el => el?.tagName === 'text')
+}
+
+const getChangedTextElements = (textElements, attr, newValue) => {
+  const normalizedValue = String(newValue)
+  return textElements.filter((elem) => {
+    const oldValue = attr === '#text' ? elem.textContent : elem.getAttribute(attr)
+    return (oldValue || '') !== normalizedValue
+  })
+}
+
+const notifyTextChange = (textElements) => {
+  if (textElements.length > 0) {
+    svgCanvas.call('changed', textElements)
+  }
+}
+
 /**
  * Check if all selected text elements are in bold.
  * @function module:svgcanvas.SvgCanvas#getBold
  * @returns {boolean} `true` if all selected elements are bold, `false` otherwise.
  */
 const getBoldMethod = () => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
+  const textElements = getSelectedTextElements()
   return textElements.every(el => el.getAttribute('font-weight') === 'bold')
 }
 
@@ -673,13 +690,16 @@ const getBoldMethod = () => {
  * @returns {void}
  */
 const setBoldMethod = (b) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('font-weight', b ? 'bold' : 'normal', textElements)
+  const textElements = getSelectedTextElements()
+  const value = b ? 'bold' : 'normal'
+  const changedTextElements = getChangedTextElements(textElements, 'font-weight', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('font-weight', value, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -687,8 +707,7 @@ const setBoldMethod = (b) => {
  * @returns {boolean} Indicates whether or not elements have the text decoration value
  */
 const hasTextDecorationMethod = (value) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
+  const textElements = getSelectedTextElements()
   return textElements.every(el => (el.getAttribute('text-decoration') || '').includes(value))
 }
 
@@ -699,8 +718,7 @@ const hasTextDecorationMethod = (value) => {
  */
 const addTextDecorationMethod = (value) => {
   const { ChangeElementCommand, BatchCommand } = svgCanvas.history
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
+  const textElements = getSelectedTextElements()
 
   const batchCmd = new BatchCommand()
   textElements.forEach(elem => {
@@ -727,8 +745,7 @@ const addTextDecorationMethod = (value) => {
  */
 const removeTextDecorationMethod = (value) => {
   const { ChangeElementCommand, BatchCommand } = svgCanvas.history
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
+  const textElements = getSelectedTextElements()
 
   const batchCmd = new BatchCommand()
   textElements.forEach(elem => {
@@ -751,8 +768,7 @@ const removeTextDecorationMethod = (value) => {
  * @returns {boolean} `true` if all selected elements are in italics, `false` otherwise.
  */
 const getItalicMethod = () => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
+  const textElements = getSelectedTextElements()
   return textElements.every(el => el.getAttribute('font-style') === 'italic')
 }
 
@@ -763,13 +779,16 @@ const getItalicMethod = () => {
  * @returns {void}
  */
 const setItalicMethod = (i) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('font-style', i ? 'italic' : 'normal', textElements)
+  const textElements = getSelectedTextElements()
+  const value = i ? 'italic' : 'normal'
+  const changedTextElements = getChangedTextElements(textElements, 'font-style', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('font-style', value, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -778,10 +797,12 @@ const setItalicMethod = (i) => {
  * @returns {void}
  */
 const setTextAnchorMethod = (value) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('text-anchor', value, textElements)
-  svgCanvas.call('changed', selectedElements)
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'text-anchor', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('text-anchor', value, changedTextElements)
+  }
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -790,13 +811,15 @@ const setTextAnchorMethod = (value) => {
  * @returns {void}
  */
 const setLetterSpacingMethod = (value) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('letter-spacing', value, textElements)
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'letter-spacing', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('letter-spacing', value, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -805,13 +828,15 @@ const setLetterSpacingMethod = (value) => {
  * @returns {void}
  */
 const setWordSpacingMethod = (value) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('word-spacing', value, textElements)
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'word-spacing', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('word-spacing', value, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -820,13 +845,15 @@ const setWordSpacingMethod = (value) => {
  * @returns {void}
  */
 const setTextLengthMethod = (value) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('textLength', value, textElements)
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'textLength', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('textLength', value, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -835,13 +862,15 @@ const setTextLengthMethod = (value) => {
  * @returns {void}
  */
 const setLengthAdjustMethod = (value) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
-  svgCanvas.changeSelectedAttribute('lengthAdjust', value, textElements)
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'lengthAdjust', value)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('lengthAdjust', value, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -859,14 +888,16 @@ const getFontFamilyMethod = () => {
 * @returns {void}
 */
 const setFontFamilyMethod = (val) => {
-  const selectedElements = svgCanvas.getSelectedElements()
-  const textElements = selectedElements.filter(el => el?.tagName === 'text')
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'font-family', val)
   svgCanvas.setCurText('font_family', val)
-  svgCanvas.changeSelectedAttribute('font-family', val, textElements)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('font-family', val, changedTextElements)
+  }
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -876,10 +907,13 @@ const setFontFamilyMethod = (val) => {
 * @returns {void}
 */
 const setFontColorMethod = (val) => {
-  const selectedElements = svgCanvas.getSelectedElements()
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'fill', val)
   svgCanvas.setCurText('fill', val)
-  svgCanvas.changeSelectedAttribute('fill', val)
-  svgCanvas.call('changed', selectedElements)
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('fill', val, changedTextElements)
+  }
+  notifyTextChange(changedTextElements)
 }
 
 /**
@@ -905,13 +939,16 @@ const getFontSizeMethod = () => {
 * @returns {void}
 */
 const setFontSizeMethod = (val) => {
-  const selectedElements = svgCanvas.getSelectedElements()
+  const textElements = getSelectedTextElements()
+  const changedTextElements = getChangedTextElements(textElements, 'font-size', val)
   svgCanvas.setCurText('font_size', val)
-  svgCanvas.changeSelectedAttribute('font-size', val)
-  if (!selectedElements[0]?.textContent) {
+  if (changedTextElements.length > 0) {
+    svgCanvas.changeSelectedAttribute('font-size', val, changedTextElements)
+  }
+  if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
-  svgCanvas.call('changed', selectedElements)
+  notifyTextChange(changedTextElements)
 }
 
 /**
