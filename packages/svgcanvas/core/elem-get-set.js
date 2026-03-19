@@ -679,6 +679,7 @@ const setBoldMethod = (b) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -768,6 +769,7 @@ const setItalicMethod = (i) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -779,6 +781,7 @@ const setTextAnchorMethod = (value) => {
   const selectedElements = svgCanvas.getSelectedElements()
   const textElements = selectedElements.filter(el => el?.tagName === 'text')
   svgCanvas.changeSelectedAttribute('text-anchor', value, textElements)
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -793,6 +796,7 @@ const setLetterSpacingMethod = (value) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -807,6 +811,7 @@ const setWordSpacingMethod = (value) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -821,6 +826,7 @@ const setTextLengthMethod = (value) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -835,6 +841,7 @@ const setLengthAdjustMethod = (value) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -859,6 +866,7 @@ const setFontFamilyMethod = (val) => {
   if (!textElements.some(el => el.textContent)) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -868,8 +876,10 @@ const setFontFamilyMethod = (val) => {
 * @returns {void}
 */
 const setFontColorMethod = (val) => {
+  const selectedElements = svgCanvas.getSelectedElements()
   svgCanvas.setCurText('fill', val)
   svgCanvas.changeSelectedAttribute('fill', val)
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
@@ -901,6 +911,7 @@ const setFontSizeMethod = (val) => {
   if (!selectedElements[0]?.textContent) {
     svgCanvas.textActions.setCursor()
   }
+  svgCanvas.call('changed', selectedElements)
 }
 
 /**
